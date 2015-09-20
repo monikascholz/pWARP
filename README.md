@@ -81,8 +81,29 @@ echo "end   time: `date`"
 run this script using sbatch.
 
 ## Direct access to image analysis
+The warp.py file can be used as an independent image analysis library.
+If this is the case, import warp.py and call the function
+```
+warp_detector(params)
+```
+in your code. The argument is a dictionary of required parameters;
 
-
+```python
+params = {'cropx': [0, -1], 
+    'chunk': 60, 
+    'roisize': 120, 
+    'start': 0, 
+    'end': 1801, 
+    'rotate': False, 
+    'directory': '../images/df0432/',
+    'y0': 469.84462300000001,
+    'x0': 69.5, 
+    'type': 'png', 
+    'basename': 'df0432',
+    'outdir': '../results/'}
+```
+The parameters correspond to the list in the section on Usage.
+Additionally, x0 and y0 are the coordinates of the region of interest. The images are cropped to an area of +/- roisize around these coordinates after alignment.
 
 ## Contact
 mscholz@uchicago.edu
