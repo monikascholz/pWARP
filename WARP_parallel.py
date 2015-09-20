@@ -107,5 +107,3 @@ if __name__ == "__main__":
     t2 = time.time()
     print "Task completed in %f seconds."%(t2-t1)
     
-      
-    
