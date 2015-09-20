@@ -36,15 +36,11 @@ Parameter details below.
 
 ```bash
 positional arguments:
-  basename              name/identifier of all related files and output eg.
-                        yl0027
-                        
+  basename              name/identifier for outputand scipts eg. yl0027
   directory             directory containing images
   outdir                directory for output
-  
 
 optional arguments:
-
   -h, --help            show this help message and exit
   -v, --version         show program's version number and exit
   -mode MODE            manual determination of bulb location or automatic.
@@ -52,7 +48,6 @@ optional arguments:
   -nprocs NPROCS        number of processes in parallelization
   -script_dir SCRIPTDIR
                         directory where warp.py for image analysis is located
-  
   -account ACCOUNT      midway account name for submission script header
   -intrvl INTRVL        Spacing between ROi detection.
   -typ TYP              image type by extension
@@ -60,8 +55,13 @@ optional arguments:
   -end END              time stamp ending in frame number
   -rotate ROT           rotate image, binary
   -chunk CHUNK          spacing between drift corrections.
-  -roisize ROISIZE      size [px] region of interest around bulb for image analysis
+  -roisize ROISIZE      size [px] region of interest around bulb for image
+                        analysis.
   -size SIZE            size of matching template (half width).
+  -entropybins BINS BINS BINS
+                        histogram bins, arguments to numpy.linspace. (min,
+                        max, nbin)
+
 ```
 
 
