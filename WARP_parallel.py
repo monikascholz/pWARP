@@ -87,6 +87,7 @@ def parser_fill(parser):
     parser.add_argument('-outdir', type=str, help="where results go directory", required=True)
     parser.add_argument('-cropx', type=int,nargs=2, help="xmin and xmax for cropping image")
     parser.add_argument('-rotate', type=boolean, default =False,help="rotate image")
+    parser.add_argument('-entropybins', type = float, nargs=3, default = (0.2,1,64), help="histogram bins, arguments to numpy.linspace. (min, max, nbin)")
     
 
 def localmain(params):

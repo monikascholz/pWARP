@@ -147,9 +147,9 @@ def interpol_drift(drift, params):
 ##===================================================#
 #          feature detection
 ## ==================================================#
-def calc_entr(im):
+def calc_entr(im, params):
     '''calculate image entropy using fast histogram method.'''
-    bins = np.linspace(0.2,1,64)
+    bins = np.linspace(params['entropybins'])
     #bins = np.linspace()
     #print np.max(im)
     #bins = 64
@@ -173,7 +173,7 @@ def difference_entropy(im1,im2, cms, params):
     diff_small = np.abs(diff[max(0,cms[0]-size):cms[0]+size, max(0,cms[1]-sizex):cms[1]+sizex])
     #diff[max(0,cms[0]-size):cms[0]+size, max(0,cms[1]-sizex):cms[1]+sizex] = 0 
     # entropy of small snippet    
-    entr2, entr1 = calc_entr(diff_small)
+    entr2, entr1 = calc_entr(diff_small, params)
     #rest of image entropy    
     #entr1, area1 = calc_entr(np.abs(diff))
 
@@ -225,10 +225,8 @@ def pumping(params, roi):
 ## ==================================================#
 def warp_detector(params):
     """ main script to run entropy-based change detection on a stack of images.
-    If run directly, needs a dictionary like this:
     If run directly, needs a dictionary like this (all entries required):
     params = {'cropx': [0, -1], 
-    'NPROCS': 16, 
     'end': 1801, 
     'chunk': 60, 
     'roisize': 120, 
@@ -236,11 +234,12 @@ def warp_detector(params):
     'rotate': False, 
     'directory': '../images/df0432/',
     'y0': 469.84462300000001,
-    'x0': 69.5, 'roi_file': 
-    '../results/roi_df0432', 
+    'x0': 69.5, 
     'type': 'png', 
     'basename': 'df0432',
-    'outdir': '../results/'}
+    'outdir': '../results/',
+    'entropybins': (0,1,64)
+    }
     """"
     ##===================================================#
     #           Translation correction

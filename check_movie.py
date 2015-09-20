@@ -2,7 +2,7 @@
 """
 Created on Mon Aug 11 13:53:13 2014
 This module allows manual to interactively set up pumping analysis. The user input is transformed into
-a batch submission script ready for midway, Resolution of interactivity can be changed.
+a batch submission script ready for midway.
 """
 
 import matplotlib as mpl
@@ -191,10 +191,10 @@ def write_slurm_file(p):
             f.write("""#!/bin/sh \n#SBATCH --account=weare-dinner\n#SBATCH --job-name=%s\n#SBATCH --output=%s\n\
 #SBATCH --exclusive\n#SBATCH --time=1:0:0\n#SBATCH --partition=weare-dinner\n#SBATCH --qos=weare-dinner\n
  \necho "start time: `date`"\n """%(p.BASENAME,p.BASENAME+'.out'))
-        
         f.write('python WARP_parallel.py -nprocs %i -type %s -basename %s -directory "%s" -roi_file "%s" \
--outdir "%s" -cropx %i %i -rotate %s -chunk %s -roisize %s \n'%(p.NPROCS, p.TYP, p.BASENAME, p.DIRC,\
-            os.path.join(p.OUTDIR, "roi_"+p.BASENAME), p.OUTDIR,p.CROP[0], p.CROP[1], p.ROT,p.CHUNK, p.ROISIZE ))
+    -outdir "%s" -cropx %i %i -rotate %s -chunk %s -roisize %s -entropybins %s %s %s \n'%(p.NPROCS, p.TYP, p.BASENAME, p.DIRC,\
+                os.path.join(p.OUTDIR, "roi_"+p.BASENAME), p.OUTDIR,p.CROP[0], p.CROP[1], p.ROT,p.CHUNK, p.ROISIZE, p.BINS[0], p.BINS[1], p.BINS[2]))
+        
         f.write("""echo "end   time: `date`" """)
 
 ##===================================================#
@@ -240,7 +240,7 @@ def get_crop_coords(p):
     if p.ROT:
         img = np.transpose(img)
     ok = False
-    im = ax.imshow(img,cmap='gray', origin = 'lower')
+    ax.imshow(img,cmap='gray', origin = 'lower')
     plt.title("Click on the left and on the right of the worm to get ROI (crop x).")
     clicks=clickSaver()
     while ok !=True:
@@ -284,7 +284,7 @@ def get_bulb_coords(p):
     if p.CROP !=None:
         img = img[:,p.CROP[0]:p.CROP[1]]
     ok = False
-    im=ax.imshow(img,cmap='gray', origin = 'lower')
+    ax.imshow(img,cmap='gray', origin = 'lower')
     plt.title("Click on the center of the bulb. Correct with right-klick, finish with space.")
     clicks=clickSaver()
     while ok !=True:
@@ -363,14 +363,13 @@ def write_ROI(p):
     fig = plt.figure()
     clicks=clickSaver()
     clicks.reset_data()
-    cid = fig.canvas.mpl_connect('button_press_event', clicks.onclick)
+    fig.canvas.mpl_connect('button_press_event', clicks.onclick)
     ax = fig.add_subplot(111)
     plt.title("Click on the bulb, if worm is out of frame click outside of image.")
     # read images
     filenames = os.listdir(p.DIRC)
     filenames  = [f for f in filenames if ".%s"%p.TYP in f]
     filenames = np.array(natural_sort(filenames))
-    #dynamic steps accounting for moving worms
     
     filenames = filenames[p.START:p.END:p.INTRVL]
     time = np.arange(p.START,p.END,p.INTRVL)
@@ -407,7 +406,7 @@ def parser_fill(parser):
     # arguments only for this script
     parser.add_argument('-mode', type = str, dest = 'MODE', default = 'auto', help="manual determination of bulb location or automatic.")  
     parser.add_argument('-crop', type = boolean, dest = 'CROP', default = True, help="Open crop dialog.")  
-    
+
     # parallelization arguments
     parser.add_argument('-nprocs', type=int, action='store',dest='NPROCS',default=1, help="number of processes in parallelization")
     parser.add_argument('-script_dir', type=str,dest='SCRIPTDIR', default='.', help="directory where warp.py for image analysis is located")
@@ -418,20 +417,18 @@ def parser_fill(parser):
     # required positional arguments
     parser.add_argument('BASENAME', type=str,metavar='basename', help="name/identifier for outputand scipts eg. yl0027")
     parser.add_argument('DIRC', metavar='directory', type=str,help="directory containing images")
-    parser.add_argument('OUTDIR', type=str,metavar='outdir', help="directory for output")    
+    parser.add_argument('OUTDIR', type=str,metavar='outdir', help="directory for output")
     
     parser.add_argument('-typ', type=str, action='store',dest='TYP',default='png', help="image type by extension")
     parser.add_argument('-start', type=int,default=0,dest='START', help="time stamp starting eg. frame 0 -> 0")
     parser.add_argument('-end', type=int,default=225001,dest='END',  help="time stamp ending in frame number")
     
-   
     # arguments for image analysis
     parser.add_argument('-rotate', type=boolean,dest='ROT',default=False, help="rotate image, binary")
     parser.add_argument('-chunk', type = int, dest = 'CHUNK', default = 60, help="spacing between drift corrections.")
     parser.add_argument('-roisize', type=int, dest = 'ROISIZE', default=120,help="size [px] region of interest around bulb for image analysis.")
     parser.add_argument('-size', type = int, dest = 'SIZE', default = 85, help="size of matching template (half width).")
-    
-        
+    parser.add_argument('-entropybins', type = float, nargs=3,dest = 'BINS', default = (0.2,1,64), help="histogram bins, arguments to numpy.linspace. (min, max, nbin)")
     
 def main():
     #read arguments
