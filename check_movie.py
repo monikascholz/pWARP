@@ -228,13 +228,14 @@ class clickSaver:
 #          crop image
 ## ==================================================#       
          
-def get_crop_coords(p):
+def get_crop_coords(p, filenames):
     """get coordinates left and right"""
     plt.ion()
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    bn = p.BASENAME#'_'.join(p.BASENAME.split("_")[:-1])
-    filename = "%s_%s.%s"%(bn,str(p.START+1).zfill(4),p.TYP)
+    filename = filenames[0]
+    #bn = p.BASENAME#'_'.join(p.BASENAME.split("_")[:-1])
+    #filename = "%s_%s.%s"%(bn,str(p.START+1).zfill(4),p.TYP)
     img=mpimg.imread(os.path.join(p.DIRC,filename))
     
     if p.ROT:
@@ -269,14 +270,12 @@ def get_crop_coords(p):
 #         input bulb location first image
 ## ==================================================#
 
-def get_bulb_coords(p):
+def get_bulb_coords(p, filenames):
     """Get bulb location in the first image."""
     plt.ion()
     fig = plt.figure()
     ax = fig.add_subplot(111)
-    #bn = '_'.join(p.BASENAME.split("_")[:-1])
-    bn = p.BASENAME
-    filename = "%s_%s.%s"%(bn,str(p.START+1).zfill(4),p.TYP)
+    filename = filenames[0]
     img=mpimg.imread(os.path.join(p.DIRC,filename))
     
     if p.ROT:
@@ -310,12 +309,8 @@ def get_bulb_coords(p):
     return bulb
 
 
-def find_ROI(p):
+def find_ROI(p, filenames):
     """Uses template matching to find ROI."""
-    # read images
-    filenames = os.listdir(p.DIRC)
-    filenames  = [f for f in filenames if ".%s"%p.TYP in f]
-    filenames = np.array(natural_sort(filenames))
     # define bulb template
     templ = define_template(filenames[:20], p)
     # find template location in all following images
@@ -357,7 +352,7 @@ def clean_roi(time,xroi, yroi):
     return xroi_clean, yroi_clean , time_clean
 
 
-def write_ROI(p):
+def write_ROI(p, filenames):
     """writes ROI file"""
     plt.ion()
     fig = plt.figure()
@@ -366,10 +361,7 @@ def write_ROI(p):
     fig.canvas.mpl_connect('button_press_event', clicks.onclick)
     ax = fig.add_subplot(111)
     plt.title("Click on the bulb, if worm is out of frame click outside of image.")
-    # read images
-    filenames = os.listdir(p.DIRC)
-    filenames  = [f for f in filenames if ".%s"%p.TYP in f]
-    filenames = np.array(natural_sort(filenames))
+    
     
     filenames = filenames[p.START:p.END:p.INTRVL]
     time = np.arange(p.START,p.END,p.INTRVL)
@@ -436,9 +428,13 @@ def main():
     to get from raw images to slurm submission script with basic GUI.', version="1.0")
     parser_fill(parser)
     p=parser.parse_args()
+    # sort image files for later
+    filenames = os.listdir(p.DIRC)
+    filenames  = [f for f in filenames if ".%s"%p.TYP in f]
+    filenames = np.array(natural_sort(filenames))
     # define crop area
     if p.CROP:
-        cropx = get_crop_coords(p)
+        cropx = get_crop_coords(p, filenames)
     else:
         cropx=(0,-1)
     parser.add_argument('-cropx', type=int,nargs=2,dest='CROP', help="xmin and xmax for cropping image")
@@ -447,16 +443,16 @@ def main():
     p.CROP = cropx
     
     # define bulb location first image
-    bulb = get_bulb_coords(p)
+    bulb = get_bulb_coords(p, filenames)
     p.BULB = bulb
     print "Bulb location:",bulb
     
     if p.MODE == 'auto':
         # automatically determine bulb locations in following images with interval p.intrvl
-        find_ROI(p)
+        find_ROI(p, filenames)
         # create slurm submission script for midway
     elif p.MODE =='manual':
-        write_ROI(p)
+        write_ROI(p, filenames)
         
     write_slurm_file(p)
     print 'slurm file created. %s'%os.path.join(p.SCRIPTDIR,p.BASENAME+".slurm")
