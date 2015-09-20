@@ -17,8 +17,8 @@ check_movie.py - main script with a basic matplotlib based GUI. Performs these t
 1. Crop image (GUI based)
 2. Select region of interest (ROI)  (GUI based)
 3. 
-  [] Manual mode: select ROI for each subprocess
-  [] Automatic mode: Use template correlation to find ROI throughout movie.
+  * Manual mode: select ROI for each subprocess
+  * Automatic mode: Use template correlation to find ROI throughout movie.
 4. write batch submission script
 
 ### under the hood
