@@ -408,7 +408,7 @@ def parser_fill(parser):
     parser.add_argument('-crop', type = boolean, dest = 'CROP', default = True, help="Open crop dialog.")  
 
     # parallelization arguments
-    parser.add_argument('-nprocs', type=int, action='store',dest='NPROCS',default=1, help="number of processes in parallelization")
+    parser.add_argument('-nprocs', type=int, action='store',dest='NPROCS',default=16, help="number of processes in parallelization")
     parser.add_argument('-script_dir', type=str,dest='SCRIPTDIR', default='.', help="directory where warp.py for image analysis is located")
     parser.add_argument('-account', type = str, dest = 'ACCOUNT', default = "dinner", help="midway account name for submission script header")    
     parser.add_argument('-intrvl', type=int,dest='INTRVL', default = 600, help="Spacing between ROi detection.")    
