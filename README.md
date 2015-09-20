@@ -5,10 +5,10 @@ A couple of python scripts to analyze large stacks of image data in worm feeding
 ## Dependencies
 tested on:
 
-python 2.7+
-numpy 1.9.2
-matplotlib 1.4+
-scipy 0.13.3
+*python 2.7+
+*numpy 1.9.2
+*matplotlib 1.4+
+*scipy 0.13.3
 
 ## Files
 ### main script
@@ -34,47 +34,35 @@ check_movie essentially creates an automatic submission script.
 
 Parameter details below.
 
+```bash
 positional arguments:
   basename              name/identifier of all related files and output eg.
                         yl0027
                         
   directory             directory containing images
-  
   outdir                directory for output
   
 
 optional arguments:
 
   -h, --help            show this help message and exit
-  
   -v, --version         show program's version number and exit
-  
   -mode MODE            manual determination of bulb location or automatic.
-  
   -crop CROP            Open crop dialog.
-  
   -nprocs NPROCS        number of processes in parallelization
-  
   -script_dir SCRIPTDIR
                         directory where warp.py for image analysis is located
   
   -account ACCOUNT      midway account name for submission script header
-  
   -intrvl INTRVL        Spacing between ROi detection.
-  
   -typ TYP              image type by extension
-  
   -start START          time stamp starting eg. frame 0 -> 0
-  
   -end END              time stamp ending in frame number
-  
   -rotate ROT           rotate image, binary
-  
   -chunk CHUNK          spacing between drift corrections.
-  
   -roisize ROISIZE      size [px] region of interest around bulb for image analysis
-  
   -size SIZE            size of matching template (half width).
+```
 
 
 ```bash
