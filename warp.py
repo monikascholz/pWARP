@@ -226,7 +226,21 @@ def pumping(params, roi):
 def warp_detector(params):
     """ main script to run entropy-based change detection on a stack of images.
     If run directly, needs a dictionary like this:
-    
+    If run directly, needs a dictionary like this (all entries required):
+    params = {'cropx': [0, -1], 
+    'NPROCS': 16, 
+    'end': 1801, 
+    'chunk': 60, 
+    'roisize': 120, 
+    'start': 0, 
+    'rotate': False, 
+    'directory': '../images/df0432/',
+    'y0': 469.84462300000001,
+    'x0': 69.5, 'roi_file': 
+    '../results/roi_df0432', 
+    'type': 'png', 
+    'basename': 'df0432',
+    'outdir': '../results/'}
     """"
     ##===================================================#
     #           Translation correction
