@@ -149,7 +149,7 @@ def interpol_drift(drift, params):
 ## ==================================================#
 def calc_entr(im, params):
     '''calculate image entropy using fast histogram method.'''
-    bins = np.linspace(params['entropybins'])
+    bins = np.linspace(*params['entropybins'])
     #bins = np.linspace()
     #print np.max(im)
     #bins = 64

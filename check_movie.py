@@ -105,6 +105,7 @@ def clean_auto_coords(p, time, coords, confs, spacing, n = 3):
     ys = coords[:,0]
     ratio =  len(confs[confs==0])/1.0/len(confs)
     plt.figure(2)
+    plt.subplot(211)
     plt.title('Misstracked: %.2f'%ratio)
     plt.plot(np.diff(ys), confs[:-1],'o', lw = 2)
     
@@ -121,7 +122,7 @@ def clean_auto_coords(p, time, coords, confs, spacing, n = 3):
                 indizes.append(i+k)
     
     y_new = ys[indizes]
-    time = time[indizes]
+    time2 = time[indizes]
     confs = confs[indizes]
     spacing = spacing[indizes]
     #calculate a best-guess scenario with weighted average
@@ -134,11 +135,13 @@ def clean_auto_coords(p, time, coords, confs, spacing, n = 3):
         if avg > 0:
             conf_norm = np.sum([confs[i+k] for k in range(n) if (k+i) < len(y_new)])
             final_y.append(1.0*avg/conf_norm)
-            final_time.append(time[i])
+            final_time.append(time2[i])
             final_spacing.append(spacing[i]*n)
-    plt.figure(3)
-    plt.plot(final_time,final_y,'o-', lw=2)
+    plt.subplot(212)
     
+    plt.plot(final_time,final_y,'o-', lw=2)
+    for t in set(np.concatenate([final_time, time])):
+        plt.axvline(t)
     plt.show(block = True)
     return final_time, final_y, final_spacing
         
@@ -284,7 +287,7 @@ def get_bulb_coords(p, filenames):
         img = img[:,p.CROP[0]:p.CROP[1]]
     ok = False
     ax.imshow(img,cmap='gray', origin = 'lower')
-    plt.title("Click on the center of the bulb. Correct with right-klick, finish with space.")
+    plt.title("Click on the center of the bulb. Correct with right-klick, finish with left-click.")
     clicks=clickSaver()
     while ok !=True:
         clicks.reset_data()
