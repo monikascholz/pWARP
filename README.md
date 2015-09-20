@@ -5,10 +5,10 @@ A couple of python scripts to analyze large stacks of image data in worm feeding
 ## Dependencies
 tested on:
 
-*python 2.7+
-*numpy 1.9.2
-*matplotlib 1.4+
-*scipy 0.13.3
+* python 2.7+
+* numpy 1.9.2
+* matplotlib 1.4+
+* scipy 0.13.3
 
 ## Files
 ### main script
