@@ -48,7 +48,7 @@ def read_sequentially(params, intrvl = 1):
             filenames2.append(filenames[-1])
             params['nof'] = (len(filenames)-params["start"])
     for filename in filenames2:
-        yield read_img(params['directory']+filename, params)
+        yield read_img(os.path.join(params['directory'],filename), params)
   
   
 def read_img(fname, params):
@@ -241,7 +241,7 @@ def warp_detector(params):
     'type': 'png', 
     'basename': 'df0432',
     'outdir': '../results/'}
-    """"
+    """
     ##===================================================#
     #           Translation correction
     ## ==================================================#
