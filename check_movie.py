@@ -137,11 +137,11 @@ def clean_auto_coords(p, time, coords, confs, spacing, n = 3):
             final_y.append(1.0*avg/conf_norm)
             final_time.append(time2[i])
             final_spacing.append(spacing[i]*n)
+            
     plt.subplot(212)
-    
     plt.plot(final_time,final_y,'o-', lw=2)
-    for t in set(np.concatenate([final_time, time])):
-        plt.axvline(t)
+    for j in range(0,len(ys),n):
+        plt.axvline(time[j])
     plt.show(block = True)
     return final_time, final_y, final_spacing
         
