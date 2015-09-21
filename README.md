@@ -78,7 +78,7 @@ results on this output file
 #SBATCH --time=1:0:0
 
 echo "start time: `date`"
- python WARP_parallel.py -nprocs 16 -type bmp -basename ser6 -directory "../images/5Ht_10s_switch" -roi_file "../results/roi_ser6"     -outdir "../results/" -cropx 5 65 -rotate False -chunk 60 -roisize 250 -entropybins 0.06 0.5 30.0 
+ python WARP_parallel.py -nprocs 16 -type bmp -basename ser6 -directory "../images/im_folder" -roi_file "../results/roi_ser6"     -outdir "../results/" -cropx 5 65 -rotate False -chunk 60 -roisize 250 -entropybins 0.06 0.5 30.0 
 ```
 
 run this script using sbatch. Note the positional and optional arguments.
