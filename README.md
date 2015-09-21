@@ -63,7 +63,11 @@ optional arguments:
                         max, nbin)
 
 ```
-
+Running the script e.g. with these parameters:
+```bash
+python check_movie.py ser6 ../images/im_folder ../results/ -roisize 250 -entropybins 0.06 0.5 30 -typ bmp
+```
+results on this output file
 
 ```bash
 #!/bin/sh 
@@ -74,11 +78,10 @@ optional arguments:
 #SBATCH --time=1:0:0
 
 echo "start time: `date`"
- python WARP_parallel.py -nprocs 16 -type png -basename $FNAME -directory "../images/$FNAME/" -roi_file "../results/roi_$FNAME" -outdir "../results/" -cropx 0 -1 -rotate False 
-echo "end   time: `date`" 
+ python WARP_parallel.py -nprocs 16 -type bmp -basename ser6 -directory "../images/5Ht_10s_switch" -roi_file "../results/roi_ser6"     -outdir "../results/" -cropx 5 65 -rotate False -chunk 60 -roisize 250 -entropybins 0.06 0.5 30.0 
 ```
 
-run this script using sbatch.
+run this script using sbatch. Note the positional and optional arguments.
 
 ## Direct access to image analysis
 The warp.py file can be used as an independent image analysis library.
