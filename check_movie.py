@@ -140,8 +140,8 @@ def clean_auto_coords(p, time, coords, confs, spacing, n = 3):
             
     plt.subplot(212)
     plt.plot(final_time,final_y,'o-', lw=2)
-    for j in range(0,len(ys),n):
-        plt.axvline(time[j])
+    #for j in range(0,len(ys),n):
+    #    plt.axvline(time[j])
     plt.show(block = True)
     return final_time, final_y, final_spacing
         
