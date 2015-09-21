@@ -109,7 +109,7 @@ def clean_auto_coords(p, time, coords, confs, spacing, n = 3):
     plt.title('Misstracked: %.2f'%ratio)
     plt.plot(np.diff(ys), confs[:-1],'o', lw = 2)
     
-    plt.show(block = True)
+    #plt.show(block = True)
     # make an outlier cutoff
     indizes = []
     for i in range(0,len(ys),n):

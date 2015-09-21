@@ -268,7 +268,7 @@ def warp_detector(params):
         #make unique figures needed for parallelization
         fig = plt.figure(params["start"]+1) 
         ax1 = fig.add_subplot(311)
-        kymo=np.array(kymo)
+        kymo = np.array(kymo)
         plt.imshow(np.transpose(kymo), aspect='auto', cmap= "gray", origin='lower')
         plt.plot(0, params['y0'], 'ro')
         ax1.set_xlim([0,len(kymo)])
