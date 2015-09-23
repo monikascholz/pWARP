@@ -428,7 +428,7 @@ def parser_fill(parser):
 def main():
     #read arguments
     parser = argparse.ArgumentParser(description='Main_1.0: Interactive program \
-    to get from raw images to slurm submission script with basic GUI.', version="1.0")
+    to get from raw images to slurm submission script with basic GUI.', version="1.0", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser_fill(parser)
     p=parser.parse_args()
     # sort image files for later
