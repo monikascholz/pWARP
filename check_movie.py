@@ -28,11 +28,11 @@ def define_template(filenames, p):
     #width =  int(0.8*height) 
     for fname in filenames:
         image = misc.imread(os.path.join(p.DIRC,fname))
-        width = int(image.shape[1]/3.)
         if p.ROT:
             image = np.transpose(image)
         if p.CROP !=None:
             image = image[:,p.CROP[0]:p.CROP[1]]
+        width = int(image.shape[1]/3.)
         data1  = np.asarray(image, dtype = np.int64)
         bulbs.append(data1[max(y - height, 0):y + height, max(x - width, 0):x + width])
     bulbs = np.array(bulbs)
@@ -268,7 +268,7 @@ def get_crop_coords(p, filenames):
     plt.close(fig)
     print 'CROP coords:', crops
     return crops
-
+    
 ##===================================================#
 #         input bulb location first image
 ## ==================================================#
