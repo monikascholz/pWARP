@@ -260,11 +260,13 @@ def get_crop_coords(p, filenames):
         cid2 = fig.canvas.mpl_connect('button_press_event', clicks.binary_check)
         plt.title("left mouse button: accept ROI, right button: select a new ROI")
         plt.draw()
+        plt.tight_layout()
         plt.waitforbuttonpress()
         ok = bool(clicks.key%3)
         fig.canvas.mpl_disconnect(cid2)
         [ax.lines.remove(l) for l in lines]
         plt.draw()
+        plt.tight_layout()
     plt.close(fig)
     print 'CROP coords:', crops
     return crops
@@ -287,6 +289,7 @@ def get_bulb_coords(p, filenames):
         img = img[:,p.CROP[0]:p.CROP[1]]
     ok = False
     ax.imshow(img,cmap='gray', origin = 'lower')
+    plt.tight_layout()
     plt.title("Click on the center of the bulb. Correct with right-klick, finish with left-click.")
     clicks=clickSaver()
     while ok !=True:
@@ -301,6 +304,7 @@ def get_bulb_coords(p, filenames):
         cid2 = fig.canvas.mpl_connect('button_press_event', clicks.binary_check)
         plt.title("left mouse button: accept bulb location, right button: select a new bulb location.")
         plt.draw()
+        plt.tight_layout()
         plt.waitforbuttonpress()
         ok = bool(clicks.key%3)
         fig.canvas.mpl_disconnect(cid2)
@@ -378,16 +382,18 @@ def write_ROI(p, filenames):
             if p.CROP !=None:
                 img = img[:,p.CROP[0]:p.CROP[1]]
             if cnt==0:
-                im=ax.imshow(img,cmap='gray')
+                im=ax.imshow(img,cmap='gray', origin = 'lower')
                 text = plt.text(-1.5,0.9,"%s"%fn, transform = ax.transAxes)
                 text2 = plt.text(-1.5,0.8,"%i\%i"%(float(cnt),(len(filenames)-1)), transform = ax.transAxes)
                 plt.draw()
+                plt.tight_layout()
                 plt.waitforbuttonpress()
             else:
                 im.set_data(img)
                 text.set_text("%s"%fn)
                 text2.set_text("%i\%i"%(float(cnt),(len(filenames)-1)))
                 plt.draw()
+                plt.tight_layout()
                 plt.waitforbuttonpress()
     except IOError:
         print "Problem with image?"
