@@ -245,6 +245,7 @@ def get_crop_coords(p, filenames):
         img = np.transpose(img)
     ok = False
     ax.imshow(img,cmap='gray', origin = 'lower')
+    plt.tight_layout()
     plt.title("Click on the left and on the right of the worm to get ROI (crop x).")
     clicks=clickSaver()
     while ok !=True:
@@ -393,7 +394,7 @@ def write_ROI(p, filenames):
                 text.set_text("%s"%fn)
                 text2.set_text("%i\%i"%(float(cnt),(len(filenames)-1)))
                 plt.draw()
-                plt.tight_layout()
+                #plt.tight_layout()
                 plt.waitforbuttonpress()
     except IOError:
         print "Problem with image?"
