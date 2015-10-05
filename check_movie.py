@@ -104,7 +104,7 @@ def clean_auto_coords(p, time, coords, confs, spacing, n = 3):
     best guess of the bulb location."""
     ys = coords[:,0]
     ratio =  len(confs[confs==0])/1.0/len(confs)
-    plt.figure(2)
+    fig = plt.figure(figsize=(12,8), dpi=100,edgecolor='k',facecolor='w')
     plt.subplot(211)
     plt.title('Misstracked: %.2f'%ratio)
     plt.plot(np.diff(ys), confs[:-1],'o', lw = 2)
@@ -234,7 +234,7 @@ class clickSaver:
 def get_crop_coords(p, filenames):
     """get coordinates left and right"""
     plt.ion()
-    fig = plt.figure()
+    fig = plt.figure(figsize=(12,8), dpi=100,edgecolor='k',facecolor='w')
     ax = fig.add_subplot(111)
     filename = filenames[0]
     #bn = p.BASENAME#'_'.join(p.BASENAME.split("_")[:-1])
@@ -276,7 +276,7 @@ def get_crop_coords(p, filenames):
 def get_bulb_coords(p, filenames):
     """Get bulb location in the first image."""
     plt.ion()
-    fig = plt.figure()
+    fig = plt.figure(figsize=(12,8), dpi=100,edgecolor='k',facecolor='w')
     ax = fig.add_subplot(111)
     filename = filenames[0]
     img=mpimg.imread(os.path.join(p.DIRC,filename))
@@ -358,7 +358,7 @@ def clean_roi(time,xroi, yroi):
 def write_ROI(p, filenames):
     """writes ROI file"""
     plt.ion()
-    fig = plt.figure()
+    fig = plt.figure(figsize=(12,8), dpi=100,edgecolor='k',facecolor='w')
     clicks=clickSaver()
     clicks.reset_data()
     fig.canvas.mpl_connect('button_press_event', clicks.onclick)

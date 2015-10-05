@@ -81,7 +81,7 @@ def reg(im1, im2, hann):
     """Find image-image correlation and translation vector using FFTs.
     remove edge effects using a hanning window."""
 
-    shape= np.array(im1.shape)
+    shape = np.array(im1.shape)
     
     fft_im1 = np.fft.fft2(im1*hann)
     fft_im2 = np.conj(np.fft.fft2(im2*hann))
