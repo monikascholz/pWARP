@@ -150,18 +150,23 @@ def interpol_drift(drift, params):
 def calc_entr(im, params):
     '''calculate image entropy using fast histogram method.'''
     bins = np.linspace(*params['entropybins'])
+    maxS = np.log(params['entropybins'][-1])
     #bins = np.linspace()
     #print np.max(im)
     #bins = 64
     hist, _ = np.histogram(im, bins)
     # shift to avoid log 0
     hist = hist + 1
-    area = 1.0*np.sum(hist)
-    
+    area = 1.0*np.sum(hist)*np.diff(bins)[0]
     entr = hist/area
+    # first entropy calculation with larger part of histogram
+    entr =  -entr*np.log(entr)/maxS#*hist, 
+     # take only tail
     cut = 10
     entr2 = hist[cut:]/1.0/np.sum(hist[cut:])
-    return -entr*np.log(entr)*hist, -entr2*np.log(entr2)*hist[cut:]
+    entr2 = -entr2*np.log(entr2)/np.log(params['entropybins'][-1]-cut)#*hist[cut:]
+    
+    return entr, entr2
 
 def difference_entropy(im1,im2, cms, params):
     """Calculates the entropy of the difference image in the region of intrest."""
