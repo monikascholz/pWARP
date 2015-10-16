@@ -82,18 +82,17 @@ def reg(im1, im2, hann):
     remove edge effects using a hanning window."""
 
     shape = np.array(im1.shape)
-    
     fft_im1 = np.fft.fft2(im1*hann)
     fft_im2 = np.conj(np.fft.fft2(im2*hann))
     
     corr = np.fft.ifft2(fft_im1*fft_im2).real
  
-    corr = ndimage.gaussian_filter(corr, .5) - ndimage.gaussian_filter(corr, 50)
+    corr = ndimage.gaussian_filter(corr, .5) - ndimage.gaussian_filter(corr, 0.25*shape[1])
     t0, t1 = np.unravel_index(np.argmax(corr), shape)
     if t0 > shape[0] // 2:
         t0 -= shape[0]
-    if t1 > shape[1] // 2:
-        t1 -= shape[1]
+    #if t1 > shape[1] // 2:
+    #    t1 -= shape[1]
     return corr, [t0, 0]
 
 
@@ -109,10 +108,9 @@ def find_roi(params):
         while True: #go through all image chunks from start to end
             im_old = im_new
             im_new = im.next()
-            im1 = np.where(im_old>np.median(im_old), 1,0)
-            im2 = np.where(im_new>np.median(im_new), 1,0)
-            
-            _,drift = reg(im1, im2, hann)    
+            im1 = np.where(im_old >= np.median(im_old), 1,0)
+            im2 = np.where(im_new >= np.median(im_new), 1,0) 
+            _,drift = reg(im1, im2, hann)
             #drift = [registration(im1, im2),0] 
             roi.append(drift)
     except StopIteration:
