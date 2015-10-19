@@ -153,17 +153,18 @@ def calc_entr(im, params):
    
     hist, _ = np.histogram(im, bins)
     # shift to avoid log 0
-    hist = hist + 1
+    loc = np.where(hist>0)
+    #hist = hist + 1
     area = 1.0*np.sum(hist)
-    entr = hist/area
+    prob = hist/area
     # first entropy calculation with larger part of histogram
-    entr =  -entr*np.log(entr)
-     # take only tail
-    cut = 10
-    entr2 = hist[cut:]/1.0/np.sum(hist[cut:])
-    entr2 = -entr2*np.log(entr2)#*hist[cut:]
+    entr =  -prob[loc]*np.log(prob[loc])
+    # take only tail
+    #cut = 10
+    #prob2 = hist[cut:]/1.0/np.sum(hist[cut:])
+    #entr2 = -prob2*np.log(prob2)#*hist[cut:]
     
-    return np.sum(entr)/maxS, np.sum(entr2)/np.log(nbin-cut)
+    return np.sum(entr)/maxS,(1+np.log(np.average(im)))/maxS
 
 def difference_entropy(im1,im2, cms, params):
     """Calculates the entropy of the difference image in the region of intrest."""
