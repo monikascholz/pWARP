@@ -185,14 +185,14 @@ def write_slurm_file(p):
     """makes submission file for sbatch."""
     with open(os.path.join(p.SCRIPTDIR,p.BASENAME+".slurm"), 'w') as f:
         if p.ACCOUNT in ["d","dinner","pi-dinner"]:
-            f.write("""#!/bin/sh \n#SBATCH --account=pi-dinner\n#SBATCH --job-name=%s\n#SBATCH --output=%s\n#SBATCH --exclusive\n#SBATCH --time=1:0:0\n\necho "start time: `date`"\n """%(p.BASENAME,p.BASENAME+'.out'))
+            f.write("""#!/bin/sh \n#SBATCH --account=pi-dinner\n#SBATCH --job-name=%s\n#SBATCH --output=%s\n#SBATCH --exclusive\n#SBATCH --time=0:15:0\n\necho "start time: `date`"\n """%(p.BASENAME,p.BASENAME+'.out'))
         
         elif p.ACCOUNT in ["b", "biron", "pi-dbiron"]:
-            f.write("""#!/bin/sh \n#SBATCH --account=pi-dbiron\n#SBATCH --job-name=%s\n#SBATCH --output=%s\n#SBATCH --exclusive\n#SBATCH --time=1:0:0\n\necho "start time: `date`"\n """%(p.BASENAME,p.BASENAME   +'.out'))
+            f.write("""#!/bin/sh \n#SBATCH --account=pi-dbiron\n#SBATCH --job-name=%s\n#SBATCH --output=%s\n#SBATCH --exclusive\n#SBATCH --time=0:15:0\n\necho "start time: `date`"\n """%(p.BASENAME,p.BASENAME   +'.out'))
         
         elif p.ACCOUNT in ["weare-dinner", "wd", "weare"]:
             f.write("""#!/bin/sh \n#SBATCH --account=weare-dinner\n#SBATCH --job-name=%s\n#SBATCH --output=%s\n\
-#SBATCH --exclusive\n#SBATCH --time=1:0:0\n#SBATCH --partition=weare-dinner\n#SBATCH --qos=weare-dinner\n
+#SBATCH --exclusive\n#SBATCH --time=0:15:0\n#SBATCH --partition=weare-dinner\n#SBATCH --qos=weare-dinner\n
  \necho "start time: `date`"\n """%(p.BASENAME,p.BASENAME+'.out'))
         f.write('python WARP_parallel.py -nprocs %i -type %s -basename %s -directory "%s" -roi_file "%s" \
     -outdir "%s" -cropx %i %i -rotate %s -chunk %s -roisize %s -entropybins %s %s %s \n'%(p.NPROCS, p.TYP, p.BASENAME, p.DIRC,\

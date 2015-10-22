@@ -126,20 +126,9 @@ def interpol_drift(drift, params):
     y = np.cumsum(drift[:,0])
 
     r = np.zeros((params['nof'],2))
-    dr = params['nof']%params['chunk']
-    
-    for cnt in xrange(1,len(r)-dr):
-        index = float(cnt)/(params["chunk"])
-        i = int(index)+1
-        vy, vx = y[i]-y[i-1], x[i]-x[i-1]
-        r[cnt] = y[i-1]+(index%1)*vy,x[i-1]+(index%1)*vx
-        
-        if cnt == len(r)-dr-1:
-            #this deals with leftover interval if images%chunk!=0
-            for rest in xrange(1,dr+1):
-                index = float(rest)/dr+1
-                vy, vx = y[i]-y[i-1], x[i]-x[i-1]
-                r[cnt+rest] = y[i-1]+(index%1*vy),x[i-1]+(index%1*vx)
+    time = np.arange(params['nof'])
+    xp = np.linspace(0,params['nof'],len(x))
+    r[:,0] = np.interp(time,xp,y,left=0, right=0)
     return r
 
 ##===================================================#
