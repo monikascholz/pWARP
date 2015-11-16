@@ -153,7 +153,7 @@ def calc_entr(im, params):
     #prob2 = hist[cut:]/1.0/np.sum(hist[cut:])
     #entr2 = -prob2*np.log(prob2)#*hist[cut:]
     
-    return np.sum(entr)/maxS,(1+np.log(np.average(im)))/maxS
+    return np.sum(entr)/maxS,(1+np.log(np.mean(im)))/maxS
 
 def difference_entropy(im1,im2, cms, params):
     """Calculates the entropy of the difference image in the region of intrest."""
