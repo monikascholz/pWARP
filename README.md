@@ -2,6 +2,7 @@
 Automatically analyze C. elegans feeding behavior. 
 A couple of python scripts to analyze large stacks of image data in worm feeding. 
 
+https://zenodo.org/badge/doi/10.5281/zenodo.49982.svg
 ## Dependencies
 tested on:
 
