@@ -168,23 +168,29 @@ def write_slurm_file(p):
     """
     with open(os.path.join(p.SCRIPTDIR,p.BASENAME+".slurm"), 'w') as f:
         if p.ACCOUNT in ["d","dinner","pi-dinner"]:
-            f.write("""#!/bin/sh \n#SBATCH --account=pi-dinner\n#SBATCH --job-name=%s\n#SBATCH --output=%s\n#SBATCH --exclusive\n#SBATCH --time=1:0:0\n\necho "start time: `date`"\n """%(p.BASENAME,p.BASENAME+'.out'))
+            f.write("""#!/bin/sh \n#SBATCH --account=pi-dinner\n#SBATCH --job-name=%s\n#SBATCH --output=%s\n#SBATCH --exclusive\n#SBATCH --time=0:15:0\n\necho "start time: `date`"\n """%(p.BASENAME,p.BASENAME+'.out'))
         
         elif p.ACCOUNT in ["b", "biron", "pi-dbiron"]:
-            f.write("""#!/bin/sh \n#SBATCH --account=pi-dbiron\n#SBATCH --job-name=%s\n#SBATCH --output=%s\n#SBATCH --exclusive\n#SBATCH --time=1:0:0\n\necho "start time: `date`"\n """%(p.BASENAME,p.BASENAME   +'.out'))
+            f.write("""#!/bin/sh \n#SBATCH --account=pi-dbiron\n#SBATCH --job-name=%s\n#SBATCH --output=%s\n#SBATCH --exclusive\n#SBATCH --time=0:15:0\n\necho "start time: `date`"\n """%(p.BASENAME,p.BASENAME   +'.out'))
         
         elif p.ACCOUNT in ["weare-dinner", "wd", "weare"]:
             f.write("""#!/bin/sh \n#SBATCH --account=weare-dinner\n#SBATCH --job-name=%s\n#SBATCH --output=%s\n\
-#SBATCH --exclusive\n#SBATCH --time=1:0:0\n#SBATCH --partition=weare-dinner\n#SBATCH --qos=weare-dinner\n
+#SBATCH --exclusive\n#SBATCH --time=0:15:0\n#SBATCH --partition=weare-dinner\n#SBATCH --qos=weare-dinner\n
  \necho "start time: `date`"\n """%(p.BASENAME,p.BASENAME+'.out'))
         f.write('python WARP_parallel.py -nprocs %i -type %s -basename %s -directory "%s" -roi_file "%s" \
     -outdir "%s" -cropx %i %i -rotate %s -chunk %s -roisize %s -entropybins %s %s %s \n'%(p.NPROCS, p.TYP, p.BASENAME, p.DIRC,\
                 os.path.join(p.OUTDIR, "roi_"+p.BASENAME), p.OUTDIR,p.CROP[0], p.CROP[1], p.ROT,p.CHUNK, p.ROISIZE, p.BINS[0], p.BINS[1], p.BINS[2]))
         
         f.write("""echo "end   time: `date`" """)
+        f.write("""echo "end   time: `date`"\n""")
+        f.write("""echo "time entropy area cms " > {0}.dat\n""".format(os.path.join(p.OUTDIR, p.BASENAME)))
+        f.write("""cd {0}\n""".format(p.OUTDIR))
+        f.write("""ls -v . | grep {0}_ | grep 'kymo$'| xargs -n 1 -I % cat % >> {1}.dat\n""".format(p.BASENAME, p.BASENAME))
+        f.write("""ls . | grep {0}_ | grep 'kymo$'| xargs -n 1 -I % rm %""".format( p.BASENAME))
     print 'python WARP_parallel.py -nprocs %i -type %s -basename %s -directory "%s" -roi_file "%s" \
     -outdir "%s" -cropx %i %i -rotate %s -chunk %s -roisize %s -entropybins %s %s %s \n'%(p.NPROCS, p.TYP, p.BASENAME, p.DIRC,\
                 os.path.join(p.OUTDIR, "roi_"+p.BASENAME), p.OUTDIR,p.CROP[0], p.CROP[1], p.ROT,p.CHUNK, p.ROISIZE, p.BINS[0], p.BINS[1], p.BINS[2])
+        
 
 ##===================================================#
 #          interactive class
@@ -285,6 +291,8 @@ def get_bulb_coords(p, filenames):
         cid = fig.canvas.mpl_connect('button_press_event', clicks.onclick)
         plt.waitforbuttonpress()
         bulb = (clicks.yroi[-1],clicks.xroi[-1])
+        ax.plot(clicks.xroi[-1],clicks.yroi[-1], 'wo')
+        ax.set_ylim(0, img.shape[0])
         ax.plot(clicks.xroi[-1],clicks.yroi[-1], 'wo')
         ax.set_ylim(0, img.shape[0])
         ax.set_xlim(0, img.shape[1])
@@ -428,7 +436,7 @@ def main():
     # sort image files for later
     filenames = os.listdir(p.DIRC)
     filenames  = [f for f in filenames if ".%s"%p.TYP in f]
-    filenames = np.array(natural_sort(filenames))
+    filenames = np.array(natural_sort(filenames))[p.START:p.END]
     # define crop area
     if p.CROP:
         cropx = get_crop_coords(p, filenames)
@@ -452,8 +460,6 @@ def main():
         write_ROI(p, filenames)
         
     write_slurm_file(p)
-    print 'slurm file created. %s'%os.path.join(p.SCRIPTDIR,p.BASENAME+".slurm")
-    
 if __name__=="__main__":
     main()
                 

@@ -83,18 +83,17 @@ def reg(im1, im2, hann):
     remove edge effects using a hanning window."""
 
     shape = np.array(im1.shape)
-    
     fft_im1 = np.fft.fft2(im1*hann)
     fft_im2 = np.conj(np.fft.fft2(im2*hann))
     
     corr = np.fft.ifft2(fft_im1*fft_im2).real
  
-    corr = ndimage.gaussian_filter(corr, .5) - ndimage.gaussian_filter(corr, 50)
+    corr = ndimage.gaussian_filter(corr, .5) - ndimage.gaussian_filter(corr, 0.25*shape[1])
     t0, t1 = np.unravel_index(np.argmax(corr), shape)
     if t0 > shape[0] // 2:
         t0 -= shape[0]
-    if t1 > shape[1] // 2:
-        t1 -= shape[1]
+    #if t1 > shape[1] // 2:
+    #    t1 -= shape[1]
     return corr, [t0, 0]
 
 
@@ -110,10 +109,9 @@ def find_roi(params):
         while True: #go through all image chunks from start to end
             im_old = im_new
             im_new = im.next()
-            im1 = np.where(im_old>np.median(im_old), 1,0)
-            im2 = np.where(im_new>np.median(im_new), 1,0)
-            
-            _,drift = reg(im1, im2, hann)    
+            im1 = np.where(im_old >= np.median(im_old), 1,0)
+            im2 = np.where(im_new >= np.median(im_new), 1,0) 
+            _,drift = reg(im1, im2, hann)
             #drift = [registration(im1, im2),0] 
             roi.append(drift)
     except StopIteration:
@@ -129,20 +127,9 @@ def interpol_drift(drift, params):
     y = np.cumsum(drift[:,0])
 
     r = np.zeros((params['nof'],2))
-    dr = params['nof']%params['chunk']
-    
-    for cnt in xrange(1,len(r)-dr):
-        index = float(cnt)/(params["chunk"])
-        i = int(index)+1
-        vy, vx = y[i]-y[i-1], x[i]-x[i-1]
-        r[cnt] = y[i-1]+(index%1)*vy,x[i-1]+(index%1)*vx
-        
-        if cnt == len(r)-dr-1:
-            #this deals with leftover interval if images%chunk!=0
-            for rest in xrange(1,dr+1):
-                index = float(rest)/dr+1
-                vy, vx = y[i]-y[i-1], x[i]-x[i-1]
-                r[cnt+rest] = y[i-1]+(index%1*vy),x[i-1]+(index%1*vx)
+    time = np.arange(params['nof'])
+    xp = np.linspace(0,params['nof'],len(x))
+    r[:,0] = np.interp(time,xp,y,left=0, right=0)
     return r
 
 ##===================================================#
@@ -155,16 +142,19 @@ def calc_entr(im, params):
     maxS = np.log(nbin)
    
     hist, _ = np.histogram(im, bins)
+    # shift to avoid log 0
     loc = np.where(hist>0)
-    
+    #hist = hist + 1
     area = 1.0*np.sum(hist)
     prob = hist/area
-    if np.sum(loc)==0:
-        return 0,-1
     # first entropy calculation with larger part of histogram
     entr =  -prob[loc]*np.log(prob[loc])
+    # take only tail
+    #cut = 10
+    #prob2 = hist[cut:]/1.0/np.sum(hist[cut:])
+    #entr2 = -prob2*np.log(prob2)#*hist[cut:]
+    
     return np.sum(entr)/maxS,(1+np.log(np.mean(im)))/maxS
-
 
 def difference_entropy(im1,im2, cms, params):
     """Calculates the entropy of the difference image in the region of intrest."""
