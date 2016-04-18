@@ -2,7 +2,6 @@
 Automatically analyze C. elegans feeding behavior. 
 A couple of python scripts to analyze large stacks of image data in worm feeding. 
 
-https://zenodo.org/badge/doi/10.5281/zenodo.49982.svg
 ## Dependencies
 tested on:
 
@@ -111,3 +110,7 @@ Additionally, x0 and y0 are the coordinates of the region of interest. The image
 
 ## Contact
 mscholz@uchicago.edu
+
+## Citation
+[![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.49982.svg)](http://dx.doi.org/10.5281/zenodo.49982)
+
