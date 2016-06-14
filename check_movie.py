@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Aug 11 13:53:13 2014
 This module allows manual to interactively set up pumping analysis. The user input is transformed into
-a batch submission script ready for midway.
+a batch submission script ready for cluster submission.
 """
 
 import matplotlib as mpl
@@ -14,14 +13,20 @@ import scipy.misc as misc
 from scipy import ndimage
 import os, argparse, re
 from skimage.feature import match_template
+from warp import natural_sort, read_img, write_data
 
 ##===================================================#
 #          automatic template finder
 ## ==================================================#
 def define_template(filenames, p):
-    """creates an average image from the region around coords[0] +/- height 
+    """defines a template region in an image stack.
+
+    Template is an average image from the region around coords[0] +/- height 
     and coords[1] +/- width. Returns the average of that region of interest
-    over all input files."""
+    over all input files given by the filenames list.
+
+    filenames: images readable by scipy.misc.imread
+    """
     bulbs = []
     y,x = p.BULB
     height = p.SIZE
@@ -41,7 +46,12 @@ def define_template(filenames, p):
     return bulbs
 
 def find_bulb(image, templ):
-    """finds the terminal bulb in an image."""
+    """finds the terminal bulb in an image using template correlation.
+
+    Finds the best location (shifted cross-correlation) between image and template 
+    return: location (x,y) and correlation value at the maximal correlation.
+
+    """
     image = ndimage.gaussian_filter(image, 2) #- ndimage.gaussian_filter(res, 50)
     cut = int(0.1*image.shape[1])
     
@@ -83,24 +93,16 @@ def find_bulb(image, templ):
     x = max(0, min(x0+templ.shape[1]/2.+cut, image.shape[1]-1))
     y = max(0,min(y0+t_half, image.shape[0]-1))
     if conf < 0.4 or conf/np.std(res) < 2.5:
-        conf = 0.0
-#    plt.gca().clear()
-#    plt.figure(1)
-#    plt.title('%f'%conf)
-#    plt.subplot(121)
-#    plt.imshow(res, origin ='lower')
-#    plt.plot(x0,y0, 'wo')
-#    plt.subplot(122)
-#    plt.imshow(image, origin ='lower')
-#    plt.plot(x,y, 'wo')
-#    plt.show()
-#    plt.waitforbuttonpress()    
-    
+        conf = 0.0 
     return y,x, conf
 
 def clean_auto_coords(p, time, coords, confs, spacing, n = 3):
-    """consolidates multiple template matches for a 
-    best guess of the bulb location."""
+    """Consolidates multiple template matches for a 
+    best guess of the bulb location.
+
+    Uses the information of multiple template matches in a movie to
+    find and remove outliers (large deviations in location of the region of interest.)
+    """
     ys = coords[:,0]
     ratio =  len(confs[confs==0])/1.0/len(confs)
     fig = plt.figure(figsize=(12,8), dpi=100,edgecolor='k',facecolor='w')
@@ -108,7 +110,6 @@ def clean_auto_coords(p, time, coords, confs, spacing, n = 3):
     plt.title('Misstracked: %.2f'%ratio)
     plt.plot(np.diff(ys), confs[:-1],'o', lw = 2)
     
-    #plt.show(block = True)
     # make an outlier cutoff
     indizes = []
     for i in range(0,len(ys),n):
@@ -139,8 +140,6 @@ def clean_auto_coords(p, time, coords, confs, spacing, n = 3):
             
     plt.subplot(212)
     plt.plot(final_time,final_y,'o-', lw=2)
-    #for j in range(0,len(ys),n):
-    #    plt.axvline(time[j])
     plt.show(block = True)
     return final_time, final_y, final_spacing
         
@@ -148,40 +147,24 @@ def clean_auto_coords(p, time, coords, confs, spacing, n = 3):
 ##===================================================#
 #          I/0
 ## ==================================================#
-def natural_sort(liste):
-    """Natural sort to have frames in right order."""
-    convert = lambda text: int(text) if text.isdigit() else text.lower()
-    alphanum_key = lambda key: [convert(c) for c in re.split('([0-9]+)', key)]
-    return sorted(liste, key = alphanum_key)
+
 
 def boolean(string):
-      string = string.lower()
-      if string in ['0', 'f', 'false', 'no', 'off']:
-          return False
-      elif string in ['1', 't', 'true', 'yes', 'on']:
-          return True
-      else:
-          raise ValueError()
-
-def read_img(fname, p):
-    """reads an image file as array."""
-    try:
-        image = misc.imread(fname, flatten=True)
-        data  = np.asarray(image, dtype = np.int64)
-        data = data[:,p.CROP[0]:p.CROP[1]]
-        return data
-    except IOError:
-        print fname
-        pass
-    
-def write_data(outdir, fname_out, data, ncol=1):
-    """writes pumping traces to file.""" 
-    s="%f "*ncol+"\n"
-    with open(os.path.join(outdir,fname_out), 'w') as f:
-        [f.write(s%tuple(x)) for x in data]          
+    """Convert commandline input to boolean values."""
+    string = string.lower()
+    if string in ['0', 'f', 'false', 'no', 'off']:
+      return False
+    elif string in ['1', 't', 'true', 'yes', 'on']:
+      return True
+    else:
+      raise ValueError()    
           
 def write_slurm_file(p):
-    """makes submission file for sbatch."""
+    """makes submission file for sbatch.
+
+    This is specific to the cluster and job handling tool used.
+    It also prints out the line calling the image analysis script.
+    """
     with open(os.path.join(p.SCRIPTDIR,p.BASENAME+".slurm"), 'w') as f:
         if p.ACCOUNT in ["d","dinner","pi-dinner"]:
             f.write("""#!/bin/sh \n#SBATCH --account=pi-dinner\n#SBATCH --job-name=%s\n#SBATCH --output=%s\n#SBATCH --exclusive\n#SBATCH --time=0:30:0\n\necho "start time: `date`"\n """%(p.BASENAME,p.BASENAME+'.out'))
@@ -197,16 +180,22 @@ def write_slurm_file(p):
     -outdir "%s" -cropx %i %i -rotate %s -chunk %s -roisize %s -entropybins %s %s %s \n'%(p.NPROCS, p.TYP, p.BASENAME, p.DIRC,\
                 os.path.join(p.OUTDIR, "roi_"+p.BASENAME), p.OUTDIR,p.CROP[0], p.CROP[1], p.ROT,p.CHUNK, p.ROISIZE, p.BINS[0], p.BINS[1], p.BINS[2]))
         
+        f.write("""echo "end   time: `date`" """)
         f.write("""echo "end   time: `date`"\n""")
         f.write("""echo "time entropy area cms " > {0}.dat\n""".format(os.path.join(p.OUTDIR, p.BASENAME)))
         f.write("""cd {0}\n""".format(p.OUTDIR))
         f.write("""ls -v . | grep {0}_ | grep 'kymo$'| xargs -n 1 -I % cat % >> {1}.dat\n""".format(p.BASENAME, p.BASENAME))
         f.write("""ls . | grep {0}_ | grep 'kymo$'| xargs -n 1 -I % rm %""".format( p.BASENAME))
+    print 'python WARP_parallel.py -nprocs %i -type %s -basename %s -directory "%s" -roi_file "%s" \
+    -outdir "%s" -cropx %i %i -rotate %s -chunk %s -roisize %s -entropybins %s %s %s \n'%(p.NPROCS, p.TYP, p.BASENAME, p.DIRC,\
+                os.path.join(p.OUTDIR, "roi_"+p.BASENAME), p.OUTDIR,p.CROP[0], p.CROP[1], p.ROT,p.CHUNK, p.ROISIZE, p.BINS[0], p.BINS[1], p.BINS[2])
+        
 
 ##===================================================#
 #          interactive class
 ## ==================================================#
 class clickSaver:
+    """Event handler for matplotlib GUI."""
     event = None
     xroi = []
     yroi = []
@@ -235,7 +224,7 @@ class clickSaver:
 ## ==================================================#       
          
 def get_crop_coords(p, filenames):
-    """get coordinates left and right"""
+    """interactive diialog to get cropping coordinates from user input."""
     plt.ion()
     fig = plt.figure(figsize=(12,8), dpi=100,edgecolor='k',facecolor='w')
     ax = fig.add_subplot(111)
@@ -280,7 +269,7 @@ def get_crop_coords(p, filenames):
 ## ==================================================#
 
 def get_bulb_coords(p, filenames):
-    """Get bulb location in the first image."""
+    """Extract the terminal bulb location from user input."""
     plt.ion()
     fig = plt.figure(figsize=(12,8), dpi=100,edgecolor='k',facecolor='w')
     ax = fig.add_subplot(111)
@@ -323,7 +312,7 @@ def get_bulb_coords(p, filenames):
 
 
 def find_ROI(p, filenames):
-    """Uses template matching to find ROI."""
+    """Uses template matching to find the region of interest (terminal bulb) in images."""
     # define bulb template
     templ = define_template(filenames[:20], p)
     # find template location in all following images
@@ -353,7 +342,7 @@ def find_ROI(p, filenames):
     write_data(p.OUTDIR, "roi_"+p.BASENAME, zip(time,xroi,yroi, spacing), ncol=4)
 
 def clean_roi(time,xroi, yroi):
-    """removes Nones and cleans out coords."""
+    """removes None and cleans up region of interest coordinates."""
     xroi_clean = []
     yroi_clean = []
     time_clean = []
@@ -366,7 +355,7 @@ def clean_roi(time,xroi, yroi):
 
 
 def write_ROI(p, filenames):
-    """writes ROI file"""
+    """writes all region of interests to file"""
     plt.ion()
     fig = plt.figure(figsize=(12,8), dpi=100,edgecolor='k',facecolor='w')
     clicks=clickSaver()
@@ -424,7 +413,7 @@ def parser_fill(parser):
     # required positional arguments
     parser.add_argument('BASENAME', type=str,metavar='basename', help="name/identifier for outputand scipts eg. yl0027")
     parser.add_argument('DIRC', metavar='directory', type=str,help="directory containing images")
-    
+    # non-required arguments
     parser.add_argument('-outdir', type=str,default='../results/',dest='OUTDIR', help="directory for output")    
     parser.add_argument('-typ', type=str, action='store',dest='TYP',default='png', help="image type by extension")
     parser.add_argument('-start', type=int,default=0,dest='START', help="time stamp starting eg. frame 0 -> 0")

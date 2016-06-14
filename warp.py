@@ -1,13 +1,13 @@
 
 # -*- coding: utf-8 -*-
 """
-Created on Tue Mar  4 19:53:51 2014
 Phase correlation drift correction.
 Used papers Cross-correlation image tracking for drift correction and 
 adsorbate analysis B. A. Mantooth, Z. J. Donhauser, K. F. Kelly, and P. S. Weiss
 for inspiration.
-For pump detection: entropy based feature detection.
-@author: Monika Kauer
+For pump detection: Entropy-based feature detection based on Guo Jing, Chng Eng Siong, Deepu Rajan.
+Foreground motion detection by difference-based spatial temporal entropy image. 379–382 (2004).
+@author: Monika Scholz
 """
 import numpy as np
 import matplotlib
@@ -73,6 +73,7 @@ def write_data(outdir, fname_out, data, ncol=1, header=None):
             f.write(header)
         [f.write(s%tuple(x)) for x in data]
         
+
 ##===================================================#
 #          image registration
 ## ==================================================#
@@ -168,12 +169,8 @@ def difference_entropy(im1,im2, cms, params):
     diff = (im2-im1)
     #crop to region of interest
     diff_small = np.abs(diff[max(0,cms[0]-size):cms[0]+size, max(0,cms[1]-sizex):cms[1]+sizex])
-    #diff[max(0,cms[0]-size):cms[0]+size, max(0,cms[1]-sizex):cms[1]+sizex] = 0 
     # entropy of small snippet    
     entr2, entr1 = calc_entr(diff_small, params)
-    #rest of image entropy    
-    #entr1, area1 = calc_entr(np.abs(diff))
-
     return entr2, entr1
 
 def pumping(params, roi):
@@ -193,11 +190,6 @@ def pumping(params, roi):
         img0 =(img0-min1)/(max1-min1)
         min1, max1 = 1.0*np.min(img1), 1.0*np.max(img1)
         img1 =(img1-min1)/(max1-min1)
-        # histogram-equalize images
-        #img0 = 1.0*(img0 - np.mean(img0)) / np.std(img0)
-        #img1 = 1.0*(img1- np.mean(img1)) / np.std(img1)
-        #img0[img0>0] = 0
-        #img1[img1>0] = 0
         while True:
             entr_small, area_small = difference_entropy(img0,img1, cms_old,params)
             sim.append([entr_small, area_small,cms_old[0]])
@@ -206,9 +198,7 @@ def pumping(params, roi):
             # normalize image
             min1, max1 = 1.0*np.min(img1), 1.0*np.max(img1)
             img1 =(img1-min1)/(max1-min1)
-            # histogram-equalize images
-            #img1 = 1.0*(img1- np.mean(img1)) / np.std(img1)
-            #img1[img1>0] = 0
+           
             cnt += 1
             kymo.append(np.sum(img0, axis=1))
     except StopIteration:

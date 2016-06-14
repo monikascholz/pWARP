@@ -1,8 +1,7 @@
 #!/usr/bin/env python 
 # -*- coding: utf-8 -*-
 """
-Created on Fri Dec 13 13:31:43 2013
-This is a wrapper for the python pump detection to make multiple jobs and split movies into snippets.
+This is a wrapper for the python pump detection to create multiple jobs and split movies into snippets.
 @author: Monika Scholz
 """
 import numpy as np
@@ -100,7 +99,7 @@ def localmain(params):
 if __name__ == "__main__":
     #uses up to 16 cores to parallelize processes.
     t1 = time.time()
-    parser = argparse.ArgumentParser(description='WARP - parallel image analysis', version="1.1")
+    parser = argparse.ArgumentParser(description='WARP - parallel image analysis', version="1.0")
     parser_fill(parser)
     p=parser.parse_args()    
     params = vars(p)
