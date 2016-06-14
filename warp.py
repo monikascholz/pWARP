@@ -93,7 +93,7 @@ def reg(im1, im2, hann):
         t0 -= shape[0]
     #if t1 > shape[1] // 2:
     #    t1 -= shape[1]
-    return corr, [t0, 0]
+    return corr, [int(t0), 0]
 
 
 def find_roi(params):
@@ -129,7 +129,7 @@ def interpol_drift(drift, params):
     time = np.arange(params['nof'])
     xp = np.linspace(0,params['nof'],len(x))
     r[:,0] = np.interp(time,xp,y,left=0, right=0)
-    return r
+    return np.array(r, dtype=int)
 
 ##===================================================#
 #          feature detection
@@ -144,10 +144,15 @@ def calc_entr(im, params):
     # shift to avoid log 0
     loc = np.where(hist>0)
     #hist = hist + 1
+    
     area = 1.0*np.sum(hist)
     prob = hist/area
+    if np.sum(loc)==0:
+        return 0,-1
     # first entropy calculation with larger part of histogram
     entr =  -prob[loc]*np.log(prob[loc])
+    #maxS = np.log(np.sum(loc))
+    #entr = -prob*np.log(prob)
     # take only tail
     #cut = 10
     #prob2 = hist[cut:]/1.0/np.sum(hist[cut:])
@@ -198,7 +203,7 @@ def pumping(params, roi):
             sim.append([entr_small, area_small,cms_old[0]])
             img0 = img1
             img1 = ndimage.shift(images.next(), roi[cnt], mode="wrap")
-            # normalize images
+            # normalize image
             min1, max1 = 1.0*np.min(img1), 1.0*np.max(img1)
             img1 =(img1-min1)/(max1-min1)
             # histogram-equalize images
@@ -208,6 +213,7 @@ def pumping(params, roi):
             kymo.append(np.sum(img0, axis=1))
     except StopIteration:
         pass
+
     finally:
         del images
     return np.array(sim), kymo
@@ -236,9 +242,20 @@ def warp_detector(params):
     ##===================================================#
     #           Translation correction
     ## ==================================================#
-    drift = find_roi(params) 
-    drift = interpol_drift(drift, params)
-    print "done with drift"
+    driftcorr = True
+    if driftcorr:
+        params['y0']= int(params['y0'])
+        params['x0'] = int(params['x0'])
+        drift = find_roi(params) 
+        drift = interpol_drift(drift, params)
+        print "done with drift"
+    else:
+        images = read_sequentially(params)
+        im0 = images.next()
+        params['x0'] = int(images.shape[1]/2.)
+        params['y0'] = int(images.shape[0]/2.)
+        drift = np.zeros((params['nof']))
+        params['roisize'] = params['y0']
     #write to stdout
     sys.stdout.flush()
     ##===================================================#
@@ -267,11 +284,13 @@ def warp_detector(params):
         ax2 = fig.add_subplot(312)
         ax2.plot(coords[:,0])
         ax2.set_xlim([0,len(coords)])
+        ax2.set_ylim([0.3, 0.7])
         plt.ylabel('image entropy')
         plt.xlabel('time')
         ax3 = fig.add_subplot(313)
         ax3.plot(coords[:,1])
         ax3.set_xlim([0,len(coords)])
+        ax3.set_ylim([-0.7, -0.3])       
         plt.ylabel('image entropy')
         plt.xlabel('time')
         fig.savefig(params["outdir"]+"/"+outputstring+"_kym.png")
