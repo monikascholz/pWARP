@@ -9,12 +9,13 @@ For pump detection: Entropy-based feature detection based on Guo Jing, Chng Eng 
 Foreground motion detection by difference-based spatial temporal entropy image. 379–382 (2004).
 @author: Monika Scholz
 """
+import os, sys, re
 import numpy as np
-import matplotlib
-matplotlib.use('Agg')
+if 'matplotlib' not in sys.modules:
+    import matplotlib
+    matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from scipy import ndimage
-import os, sys, re
 import scipy.misc as misc
 
 ##===================================================#
@@ -130,7 +131,7 @@ def interpol_drift(drift, params):
     time = np.arange(params['nof'])
     xp = np.linspace(0,params['nof'],len(x))
     r[:,0] = np.interp(time,xp,y,left=0, right=0)
-    return np.array(r, dtype=int)
+    return r
 
 ##===================================================#
 #          feature detection
@@ -146,9 +147,9 @@ def calc_entr(im, params):
     loc = np.where(hist>0)
     #hist = hist + 1
     
-    area = 1.0*np.sum(hist)
+    area = 1.0*np.sum(hist)+1
     prob = hist/area
-    if np.sum(loc)==0:
+    if np.sum(loc)< 10:
         return 0,-1
     # first entropy calculation with larger part of histogram
     entr =  -prob[loc]*np.log(prob[loc])
@@ -242,9 +243,9 @@ def warp_detector(params):
     else:
         images = read_sequentially(params)
         im0 = images.next()
-        params['x0'] = int(images.shape[1]/2.)
-        params['y0'] = int(images.shape[0]/2.)
-        drift = np.zeros((params['nof']))
+        params['x0'] = int(im0.shape[1]/2.)
+        params['y0'] = int(im0.shape[0]/2.)
+        drift = np.zeros((params['end']-params['start']))
         params['roisize'] = params['y0']
     #write to stdout
     sys.stdout.flush()
