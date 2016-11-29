@@ -401,14 +401,14 @@ def write_ROI(p, filenames):
 
 def parser_fill(parser):
     # arguments only for this script
-    parser.add_argument('-mode', type = str, dest = 'MODE', default = 'auto', help="manual determination of bulb location or automatic.")  
-    parser.add_argument('-crop', type = boolean, dest = 'CROP', default = False, help="Open crop dialog.")  
+    parser.add_argument('-mode', type = str, dest = 'MODE', default = 'manual', help="manual determination of bulb location or automatic.")  
+    parser.add_argument('-crop', type = boolean, dest = 'CROP', default = True, help="Open crop dialog.")  
 
     # parallelization arguments
     parser.add_argument('-nprocs', type=int, action='store',dest='NPROCS',default=16, help="number of processes in parallelization")
     parser.add_argument('-script_dir', type=str,dest='SCRIPTDIR', default='.', help="directory where warp.py for image analysis is located")
     parser.add_argument('-account', type = str, dest = 'ACCOUNT', default = "biron", help="midway account name for submission script header")    
-    parser.add_argument('-intrvl', type=int,dest='INTRVL', default = 600, help="Spacing between ROi detection.")    
+    parser.add_argument('-intrvl', type=int,dest='INTRVL', default = 3600, help="Spacing between ROi detection.")    
     
     # arguments about I/O
     # required positional arguments
@@ -416,7 +416,7 @@ def parser_fill(parser):
     parser.add_argument('DIRC', metavar='directory', type=str,help="directory containing images")
     # non-required arguments
     parser.add_argument('-outdir', type=str,default='../results/',dest='OUTDIR', help="directory for output")    
-    parser.add_argument('-typ', type=str, action='store',dest='TYP',default='png', help="image type by extension")
+    parser.add_argument('-typ', type=str, action='store',dest='TYP',default='jpg', help="image type by extension")
     parser.add_argument('-start', type=int,default=0,dest='START', help="time stamp starting eg. frame 0 -> 0")
     parser.add_argument('-end', type=int,default=225001,dest='END',  help="time stamp ending in frame number")
     
