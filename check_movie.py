@@ -53,20 +53,19 @@ def find_bulb(image, templ):
 
     """
     image = ndimage.gaussian_filter(image, 2) #- ndimage.gaussian_filter(res, 50)
-    cut = 0.1*image.shape[1]
+    cut = int(0.1*image.shape[1])
     
     result = match_template(image, templ)
-    xm = result.shape[1]/2.
+    xm = int(result.shape[1]/2.)
     res = result[:,max(0,-cut + xm):xm+cut]
     
     
     ij = np.unravel_index(np.argmax(res), res.shape)
     x0, y0 = ij[::-1]
     # calculate half template size
-    t_half = int(templ.shape[0])/2.
+    t_half = int(templ.shape[0]/2.)
     conf = res[y0,x0]
     
-   
     result1 = match_template(image, templ[t_half:,])
     res1 = result1[:,max(0,-cut + xm):xm+cut]
     ij = np.unravel_index(np.argmax(res1), res1.shape)
@@ -77,7 +76,7 @@ def find_bulb(image, templ):
         conf = conf1
         x0,y0 = x1,y1
         res = res1
-        t_half = int(templ.shape[0])/4.
+        t_half = int(templ.shape[0]/4.)
             
     result2 = match_template(image, templ[:t_half,])
     res2 = result2[:,max(0,-cut + xm):xm+cut]
@@ -168,14 +167,14 @@ def write_slurm_file(p):
     """
     with open(os.path.join(p.SCRIPTDIR,p.BASENAME+".slurm"), 'w') as f:
         if p.ACCOUNT in ["d","dinner","pi-dinner"]:
-            f.write("""#!/bin/sh \n#SBATCH --account=pi-dinner\n#SBATCH --job-name=%s\n#SBATCH --output=%s\n#SBATCH --exclusive\n#SBATCH --time=0:15:0\n\necho "start time: `date`"\n """%(p.BASENAME,p.BASENAME+'.out'))
+            f.write("""#!/bin/sh \n#SBATCH --account=pi-dinner\n#SBATCH --job-name=%s\n#SBATCH --output=%s\n#SBATCH --exclusive\n#SBATCH --time=0:30:0\n\necho "start time: `date`"\n """%(p.BASENAME,p.BASENAME+'.out'))
         
         elif p.ACCOUNT in ["b", "biron", "pi-dbiron"]:
-            f.write("""#!/bin/sh \n#SBATCH --account=pi-dbiron\n#SBATCH --job-name=%s\n#SBATCH --output=%s\n#SBATCH --exclusive\n#SBATCH --time=0:15:0\n\necho "start time: `date`"\n """%(p.BASENAME,p.BASENAME   +'.out'))
+            f.write("""#!/bin/sh \n#SBATCH --account=pi-dbiron\n#SBATCH --job-name=%s\n#SBATCH --output=%s\n#SBATCH --exclusive\n#SBATCH --time=0:30:0\n\necho "start time: `date`"\n """%(p.BASENAME,p.BASENAME   +'.out'))
         
         elif p.ACCOUNT in ["weare-dinner", "wd", "weare"]:
             f.write("""#!/bin/sh \n#SBATCH --account=weare-dinner\n#SBATCH --job-name=%s\n#SBATCH --output=%s\n\
-#SBATCH --exclusive\n#SBATCH --time=0:15:0\n#SBATCH --partition=weare-dinner\n#SBATCH --qos=weare-dinner\n
+#SBATCH --exclusive\n#SBATCH --time=0:30:0\n#SBATCH --partition=weare-dinner\n#SBATCH --qos=weare-dinner\n
  \necho "start time: `date`"\n """%(p.BASENAME,p.BASENAME+'.out'))
         f.write('python WARP_parallel.py -nprocs %i -type %s -basename %s -directory "%s" -roi_file "%s" \
     -outdir "%s" -cropx %i %i -rotate %s -chunk %s -roisize %s -entropybins %s %s %s \n'%(p.NPROCS, p.TYP, p.BASENAME, p.DIRC,\
@@ -263,7 +262,7 @@ def get_crop_coords(p, filenames):
         plt.tight_layout()
     plt.close(fig)
     print 'CROP coords:', crops
-    return crops
+    return np.array(crops, dtype=int)
     
 ##===================================================#
 #         input bulb location first image
@@ -309,7 +308,7 @@ def get_bulb_coords(p, filenames):
             plt.draw()
         plt.draw()
     plt.close(fig)
-    return bulb
+    return np.array(bulb, dtype=int)
 
 
 def find_ROI(p, filenames):
