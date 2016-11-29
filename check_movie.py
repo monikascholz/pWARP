@@ -35,7 +35,7 @@ def define_template(filenames, p):
         image = misc.imread(os.path.join(p.DIRC,fname))
         if p.ROT:
             image = np.transpose(image)
-        if p.CROP !=None:
+        if p.CROP is not None:
             image = image[:,p.CROP[0]:p.CROP[1]]
         width = int(image.shape[1]/3.)
         data1  = np.asarray(image, dtype = np.int64)
@@ -167,15 +167,10 @@ def write_slurm_file(p):
     """
     with open(os.path.join(p.SCRIPTDIR,p.BASENAME+".slurm"), 'w') as f:
         if p.ACCOUNT in ["d","dinner","pi-dinner"]:
-            f.write("""#!/bin/sh \n#SBATCH --account=pi-dinner\n#SBATCH --job-name=%s\n#SBATCH --output=%s\n#SBATCH --exclusive\n#SBATCH --time=0:30:0\n\necho "start time: `date`"\n """%(p.BASENAME,p.BASENAME+'.out'))
-        
+            piName = "pi-dinner"
         elif p.ACCOUNT in ["b", "biron", "pi-dbiron"]:
-            f.write("""#!/bin/sh \n#SBATCH --account=pi-dbiron\n#SBATCH --job-name=%s\n#SBATCH --output=%s\n#SBATCH --exclusive\n#SBATCH --time=0:30:0\n\necho "start time: `date`"\n """%(p.BASENAME,p.BASENAME   +'.out'))
-        
-        elif p.ACCOUNT in ["weare-dinner", "wd", "weare"]:
-            f.write("""#!/bin/sh \n#SBATCH --account=weare-dinner\n#SBATCH --job-name=%s\n#SBATCH --output=%s\n\
-#SBATCH --exclusive\n#SBATCH --time=0:30:0\n#SBATCH --partition=weare-dinner\n#SBATCH --qos=weare-dinner\n
- \necho "start time: `date`"\n """%(p.BASENAME,p.BASENAME+'.out'))
+            piName = "pi-dbiron"
+        f.write("""#!/bin/sh \n#SBATCH --account=%s\n#SBATCH --job-name=%s\n#SBATCH --output=%s\n#SBATCH --exclusive\n#SBATCH --time=1:00:0\n\necho "start time: `date`"\n """%(piName, p.BASENAME, p.BASENAME+'.out'))
         f.write('python WARP_parallel.py -nprocs %i -type %s -basename %s -directory "%s" -roi_file "%s" \
     -outdir "%s" -cropx %i %i -rotate %s -chunk %s -roisize %s -entropybins %s %s %s \n'%(p.NPROCS, p.TYP, p.BASENAME, p.DIRC,\
                 os.path.join(p.OUTDIR, "roi_"+p.BASENAME), p.OUTDIR,p.CROP[0], p.CROP[1], p.ROT,p.CHUNK, p.ROISIZE, p.BINS[0], p.BINS[1], p.BINS[2]))
@@ -278,7 +273,7 @@ def get_bulb_coords(p, filenames):
     
     if p.ROT:
         img = np.transpose(img)
-    if p.CROP !=None:
+    if p.CROP is not None:
         img = img[:,p.CROP[0]:p.CROP[1]]
     ok = False
     ax.imshow(img,cmap='gray', origin = 'lower')
@@ -327,7 +322,7 @@ def find_ROI(p, filenames):
         img=mpimg.imread(os.path.join(p.DIRC,fn))
         if p.ROT:
             img = np.transpose(img)
-        if p.CROP !=None:
+        if p.CROP is not None:
             img = img[:,p.CROP[0]:p.CROP[1]]
         
         # find bulb by template matching
