@@ -248,7 +248,7 @@ def get_crop_coords(p, filenames):
             plt.waitforbuttonpress()
         crops = np.sort([x if x!=None else 0 for x in clicks.xroi])
         for x in crops:
-            lines.append(ax.axvline(x, ymin=0.0, ymax = 1, linewidth=4, color='w'))
+            lines.append(ax.axvline(x, ymin=0.0, ymax = 1, linewidth=4, color='r'))
         fig.canvas.mpl_disconnect(cid)
         cid2 = fig.canvas.mpl_connect('button_press_event', clicks.binary_check)
         plt.title("left mouse button: accept ROI, right button: select a new ROI")
